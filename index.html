@@ -36,45 +36,51 @@
   <p id="timezone">Fetching timezone...</p>
 
   <script>
-    async function fetchAndSendUserInfo() {
+    async function fetchAndDisplayUserInfo() {
       try {
+        // Initialize display elements
+        const ipElement = document.getElementById('ip');
+        const locationElement = document.getElementById('location');
+        const browserElement = document.getElementById('browser');
+        const timezoneElement = document.getElementById('timezone');
+
         // Fetch IP-based geolocation
         const ipResponse = await fetch('https://ipapi.co/json/');
-        if (!ipResponse.ok) throw new Error('Failed to fetch IP data.');
+        if (!ipResponse.ok) {
+          throw new Error('Failed to fetch IP and location data.');
+        }
         const ipData = await ipResponse.json();
 
-        // Collect data
+        // Fetch and format user data
         const userInfo = {
           ip: ipData.ip,
           location: `${ipData.city}, ${ipData.region}, ${ipData.country_name}`,
           browser: navigator.userAgent,
-          device: window.navigator.platform,
+          device: navigator.platform,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         };
 
-        // Display data on the page
-        document.getElementById('ip').textContent = `IP Address: ${userInfo.ip}`;
-        document.getElementById('location').textContent = `Location: ${userInfo.location}`;
-        document.getElementById('browser').textContent = `Browser: ${userInfo.browser} | Device: ${userInfo.device}`;
-        document.getElementById('timezone').textContent = `Timezone: ${userInfo.timezone}`;
+        // Display user information on the page
+        ipElement.textContent = `IP Address: ${userInfo.ip}`;
+        locationElement.textContent = `Location: ${userInfo.location}`;
+        browserElement.textContent = `Browser: ${userInfo.browser} | Device: ${userInfo.device}`;
+        timezoneElement.textContent = `Timezone: ${userInfo.timezone}`;
 
-        // Send data to your backend
-        await fetch('https://your-backend-endpoint.com/receive-data', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(userInfo),
-        });
+        // Log data for debugging
+        console.log('User Info:', userInfo);
       } catch (error) {
-        console.error(error);
-        document.getElementById('ip').textContent = 'Failed to fetch IP address.';
-        document.getElementById('location').textContent = 'Failed to fetch location.';
-        document.getElementById('browser').textContent = 'Failed to fetch browser info.';
-        document.getElementById('timezone').textContent = 'Failed to fetch timezone.';
+        console.error('Error fetching user information:', error);
+
+        // Display fallback messages
+        document.getElementById('ip').textContent = 'IP Address: Unable to fetch.';
+        document.getElementById('location').textContent = 'Location: Unable to fetch.';
+        document.getElementById('browser').textContent = 'Browser: Unable to fetch.';
+        document.getElementById('timezone').textContent = 'Timezone: Unable to fetch.';
       }
     }
 
-    // Fetch and send user info when the page loads
-    window.onload = fetchAndSendUserInfo;
+    // Fetch and display user info when the page loads
+    window.onload = fetchAndDisplayUserInfo;
   </script>
 </body>
 </html>
