@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Info</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f9;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      font-size: 1.2rem;
+      color: #333;
+      margin: 0.5rem 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Your Information</h1>
+  <p id="ip">Fetching IP address...</p>
+  <p id="location">Fetching location...</p>
+  <p id="browser">Fetching browser and device info...</p>
+  <p id="timezone">Fetching timezone...</p>
+
+  <script>
+    async function fetchAndSendUserInfo() {
+      try {
+        // Fetch IP-based geolocation
+        const ipResponse = await fetch('https://ipapi.co/json/');
+        if (!ipResponse.ok) throw new Error('Failed to fetch IP data.');
+        const ipData = await ipResponse.json();
+
+        // Collect data
+        const userInfo = {
+          ip: ipData.ip,
+          location: `${ipData.city}, ${ipData.region}, ${ipData.country_name}`,
+          browser: navigator.userAgent,
+          device: window.navigator.platform,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        };
+
+        // Display data on the page
+        document.getElementById('ip').textContent = `IP Address: ${userInfo.ip}`;
+        document.getElementById('location').textContent = `Location: ${userInfo.location}`;
+        document.getElementById('browser').textContent = `Browser: ${userInfo.browser} | Device: ${userInfo.device}`;
+        document.getElementById('timezone').textContent = `Timezone: ${userInfo.timezone}`;
+
+        // Send data to your backend
+        await fetch('https://your-backend-endpoint.com/receive-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userInfo),
+        });
+      } catch (error) {
+        console.error(error);
+        document.getElementById('ip').textContent = 'Failed to fetch IP address.';
+        document.getElementById('location').textContent = 'Failed to fetch location.';
+        document.getElementById('browser').textContent = 'Failed to fetch browser info.';
+        document.getElementById('timezone').textContent = 'Failed to fetch timezone.';
+      }
+    }
+
+    // Fetch and send user info when the page loads
+    window.onload = fetchAndSendUserInfo;
+  </script>
+</body>
+</html>
